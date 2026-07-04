@@ -24,13 +24,20 @@ export function useRecords(year, month) {
   }, [year, month]);
 
   function addOrUpdate(entry) {
-    const updated = [...records];
-    const idx = updated.findIndex((r) => r.date === entry.date);
-    if (idx >= 0) updated[idx] = entry;
-    else updated.push(entry);
-    updated.sort((a, b) => a.date.localeCompare(b.date));
-    setRecords(updated);
-    saveRecords(year, month, updated);
+    const [y, m] = entry.date.split('-').map(Number);
+    const entryYear = y;
+    const entryMonth = m - 1;
+
+    const existing = loadRecords(entryYear, entryMonth);
+    const idx = existing.findIndex((r) => r.date === entry.date);
+    if (idx >= 0) existing[idx] = entry;
+    else existing.push(entry);
+    existing.sort((a, b) => a.date.localeCompare(b.date));
+    saveRecords(entryYear, entryMonth, existing);
+
+    if (entryYear === year && entryMonth === month) {
+      setRecords([...existing]);
+    }
   }
 
   function remove(date) {
