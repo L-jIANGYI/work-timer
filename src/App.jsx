@@ -59,7 +59,7 @@ export default function App() {
         {/* Two column on large screens */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left column */}
-          <div className="lg:w-72 shrink-0">
+          <div className="lg:w-96 shrink-0">
             <ClockPanel onSave={addOrUpdate} />
             <HistoryMonths currentYear={year} currentMonth={month} onSelect={handleSelect} />
           </div>
