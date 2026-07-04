@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function storageKey(year, month) {
   return `wt_${year}_${String(month + 1).padStart(2, '0')}`;
@@ -18,6 +18,10 @@ function saveRecords(year, month, records) {
 
 export function useRecords(year, month) {
   const [records, setRecords] = useState(() => loadRecords(year, month));
+
+  useEffect(() => {
+    setRecords(loadRecords(year, month));
+  }, [year, month]);
 
   function addOrUpdate(entry) {
     const updated = [...records];
