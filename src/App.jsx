@@ -12,6 +12,16 @@ function getToday() {
   return { year: t.getFullYear(), month: t.getMonth() };
 }
 
+function getLatestMonthWithRecords() {
+  const keys = Object.keys(localStorage)
+    .filter((k) => k.startsWith('wt_'))
+    .sort()
+    .reverse();
+  if (keys.length === 0) return null;
+  const [, year, month] = keys[0].split('_');
+  return { year: Number(year), month: Number(month) - 1 };
+}
+
 export default function App() {
   const today = getToday();
   const [year, setYear] = useState(today.year);
@@ -37,12 +47,43 @@ export default function App() {
     setMonth(m);
   }
 
+  function handleSave(entry) {
+    addOrUpdate(entry);
+    const [y, m] = entry.date.split('-').map(Number);
+    setYear(y);
+    setMonth(m - 1);
+  }
+
+  function goToLatest() {
+    const latest = getLatestMonthWithRecords();
+    if (latest) {
+      setYear(latest.year);
+      setMonth(latest.month);
+    }
+  }
+
+  const isLatest = (() => {
+    const latest = getLatestMonthWithRecords();
+    if (!latest) return true;
+    return latest.year === year && latest.month === month;
+  })();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-medium text-gray-800">Urenregistratie</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-medium text-gray-800">Urenregistratie</h1>
+            {!isLatest && (
+              <button
+                onClick={goToLatest}
+                className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 rounded-lg px-2 py-1 transition-colors"
+              >
+                Naar laatste ↑
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <button onClick={prevMonth} className="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
               ‹
@@ -60,7 +101,7 @@ export default function App() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left column */}
           <div className="lg:w-96 shrink-0">
-            <ClockPanel onSave={addOrUpdate} />
+            <ClockPanel onSave={handleSave} />
             <HistoryMonths currentYear={year} currentMonth={month} onSelect={handleSelect} />
           </div>
 
