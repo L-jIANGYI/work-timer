@@ -43,7 +43,11 @@ export function useRecords(year, month) {
   function remove(date) {
     const updated = records.filter((r) => r.date !== date);
     setRecords(updated);
-    saveRecords(year, month, updated);
+    if (updated.length === 0) {
+      localStorage.removeItem(storageKey(year, month));
+    } else {
+      saveRecords(year, month, updated);
+    }
   }
 
   return { records, addOrUpdate, remove };
