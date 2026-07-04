@@ -6,7 +6,8 @@ export function calcHours(start, end) {
   if (!start || !end) return null;
   const [sh, sm] = start.split(':').map(Number);
   const [eh, em] = end.split(':').map(Number);
-  const diff = eh * 60 + em - (sh * 60 + sm);
+  let diff = eh * 60 + em - (sh * 60 + sm);
+  if (diff < 0) diff += 24 * 60;
   return diff > 0 ? parseFloat((diff / 60).toFixed(1)) : null;
 }
 
