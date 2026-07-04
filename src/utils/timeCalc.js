@@ -15,7 +15,7 @@ export function getDayOfWeek(dateStr) {
 }
 
 export function formatDateNL(dateStr) {
-  const [y, m, d] = dateStr.split('-');
+  const [, m, d] = dateStr.split('-');
   return `${Number(d)} ${MONTHS_NL[Number(m) - 1]}`;
 }
 
