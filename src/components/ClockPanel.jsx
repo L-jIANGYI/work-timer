@@ -1,13 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { calcHours, getTodayStr } from '../utils/timeCalc';
+import MiniCalendar from './MiniCalender';
 
-export default function ClockPanel({ onSave }) {
+export default function ClockPanel({ onSave, getTimesForDate, templates }) {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [note, setNote] = useState('');
   const [date, setDate] = useState(getTodayStr());
 
-  const hours = calcHours(start, end);
+  useEffect(() => {
+    const times = getTimesForDate(date);
+    if (times) {
+      setStart(times.start);
+      setEnd(times.end);
+    } else {
+      setStart('');
+      setEnd('');
+    }
+  }, [date, getTimesForDate]);
+
+  function handleDateChange(newDate) {
+    setDate(newDate);
+  }
+
+  function applyTemplate(t) {
+    setStart(t.start);
+    setEnd(t.end);
+  }
 
   function handleSave() {
     if (!start) return;
@@ -15,16 +34,19 @@ export default function ClockPanel({ onSave }) {
     setNote('');
   }
 
+  const hours = calcHours(start, end);
+
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      {/* Tijden */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
         <div>
           <label className="text-xs text-gray-400 mb-1 block">Begintijd</label>
           <input
             type="time"
             value={start}
             onChange={(e) => setStart(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm"
           />
         </div>
         <div>
@@ -33,7 +55,7 @@ export default function ClockPanel({ onSave }) {
             type="time"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm"
           />
         </div>
         <div>
@@ -42,11 +64,27 @@ export default function ClockPanel({ onSave }) {
         </div>
       </div>
 
+      {/* Datum */}
       <div className="mb-4">
-        <label className="text-xs text-gray-400 mb-1 block">Datum</label>
-        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border border-gray-200 rounded-lg px-3 py-2 text-sm" />
+        <MiniCalendar value={date} onChange={handleDateChange} />
       </div>
 
+      {/* Snelle sjablonen */}
+      {templates.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {templates.map((t, i) => (
+            <button
+              key={i}
+              onClick={() => applyTemplate(t)}
+              className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-500 hover:border-blue-300 hover:text-blue-500 transition-colors"
+            >
+              {t.label} · {t.start}–{t.end}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Opmerking */}
       <input
         type="text"
         value={note}

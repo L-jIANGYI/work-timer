@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useRecords } from './hooks/useRecords';
+import { useSettings } from './hooks/useSettings';
 import { MONTHS_NL } from './utils/timeCalc';
 import { exportToExcel } from './utils/exportExcel';
 import ClockPanel from './components/ClockPanel';
 import SummaryBar from './components/SummaryBar';
 import MonthTable from './components/MonthTable';
 import HistoryMonths from './components/HistoryMonths';
+import Settings from './components/Settings';
+import MonthPicker from './components/MonthPicker';
 
 function getToday() {
   const t = new Date();
@@ -14,7 +17,7 @@ function getToday() {
 
 function getLatestMonthWithRecords() {
   const keys = Object.keys(localStorage)
-    .filter((k) => k.startsWith('wt_'))
+    .filter((k) => /^wt_\d{4}_\d{2}$/.test(k))
     .sort()
     .reverse();
   if (keys.length === 0) return null;
@@ -27,6 +30,7 @@ export default function App() {
   const [year, setYear] = useState(today.year);
   const [month, setMonth] = useState(today.month);
   const { records, addOrUpdate, remove } = useRecords(year, month);
+  const { settings, updateWeekDay, addTemplate, removeTemplate, getTimesForDate } = useSettings();
 
   function prevMonth() {
     if (month === 0) {
@@ -88,20 +92,19 @@ export default function App() {
             <button onClick={prevMonth} className="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
               ‹
             </button>
-            <span className="text-sm font-medium text-gray-700 min-w-32 text-center">
-              {MONTHS_NL[month]} {year}
-            </span>
+            <MonthPicker year={year} month={month} onChange={handleSelect} />
             <button onClick={nextMonth} className="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
               ›
             </button>
+            <Settings settings={settings} onUpdateWeekDay={updateWeekDay} onAddTemplate={addTemplate} onRemoveTemplate={removeTemplate} />
           </div>
         </div>
 
         {/* Two column on large screens */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left column */}
-          <div className="lg:w-96 shrink-0">
-            <ClockPanel onSave={handleSave} />
+          <div className="lg:w-80 shrink-0">
+            <ClockPanel onSave={handleSave} getTimesForDate={getTimesForDate} templates={settings.templates} />
             <HistoryMonths currentYear={year} currentMonth={month} onSelect={handleSelect} />
           </div>
 

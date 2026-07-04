@@ -3,10 +3,16 @@ import { MONTHS_NL, totalHours } from '../utils/timeCalc';
 
 function loadAllMonths() {
   return Object.keys(localStorage)
-    .filter((k) => k.startsWith('wt_'))
+    .filter((k) => /^wt_\d{4}_\d{2}$/.test(k))
     .map((k) => {
       const [, year, month] = k.split('_');
-      const records = JSON.parse(localStorage.getItem(k) || '[]');
+      let records = [];
+      try {
+        const parsed = JSON.parse(localStorage.getItem(k) || '[]');
+        records = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        records = [];
+      }
       return { year: Number(year), month: Number(month) - 1, records };
     })
     .sort((a, b) => b.year - a.year || b.month - a.month);
