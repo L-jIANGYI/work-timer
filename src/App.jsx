@@ -39,7 +39,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-medium text-gray-800">Urenregistratie</h1>
@@ -56,31 +56,32 @@ export default function App() {
           </div>
         </div>
 
-        {/* Clock in panel */}
-        <ClockPanel onSave={addOrUpdate} />
+        {/* Two column on large screens */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left column */}
+          <div className="lg:w-72 shrink-0">
+            <ClockPanel onSave={addOrUpdate} />
+            <HistoryMonths currentYear={year} currentMonth={month} onSelect={handleSelect} />
+          </div>
 
-        {/* Summary */}
-        <SummaryBar records={records} />
-
-        {/* Table header */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-gray-600">
-            {MONTHS_NL[month]} {year}
-          </span>
-          <button
-            onClick={() => exportToExcel(records, year, month)}
-            disabled={records.length === 0}
-            className="text-xs text-gray-400 hover:text-blue-500 disabled:opacity-30 transition-colors"
-          >
-            Exporteren naar Excel ↓
-          </button>
+          {/* Right column */}
+          <div className="flex-1 min-w-0">
+            <SummaryBar records={records} />
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-gray-600">
+                {MONTHS_NL[month]} {year}
+              </span>
+              <button
+                onClick={() => exportToExcel(records, year, month)}
+                disabled={records.length === 0}
+                className="text-xs text-gray-400 hover:text-blue-500 disabled:opacity-30 transition-colors"
+              >
+                Exporteren naar Excel ↓
+              </button>
+            </div>
+            <MonthTable records={records} onDelete={remove} />
+          </div>
         </div>
-
-        {/* Monthly table */}
-        <MonthTable records={records} onDelete={remove} />
-
-        {/* History */}
-        <HistoryMonths currentYear={year} currentMonth={month} onSelect={handleSelect} />
       </div>
     </div>
   );
