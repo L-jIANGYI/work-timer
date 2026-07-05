@@ -39,7 +39,7 @@ export default function ClockPanel({ onSave, getTimesForDate, templates }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
       {/* Tijden */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-2">
         <div>
           <label className="text-xs text-gray-400 mb-1 block">Begintijd</label>
           <input
@@ -58,10 +58,10 @@ export default function ClockPanel({ onSave, getTimesForDate, templates }) {
             className="w-full border border-gray-200 rounded-lg px-2 py-2 text-sm"
           />
         </div>
-        <div>
-          <label className="text-xs text-gray-400 mb-1 block">Uren</label>
-          <div className="text-2xl font-medium text-gray-800 pt-1">{hours !== null ? `${hours}u` : '—'}</div>
-        </div>
+      </div>
+      <div className="mb-4">
+        <label className="text-xs text-gray-400 mb-1 block">Uren</label>
+        <div className="text-2xl font-medium text-gray-800">{hours !== null ? `${hours}u` : '—'}</div>
       </div>
 
       {/* Datum */}
