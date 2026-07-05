@@ -33,7 +33,7 @@ export function useSettings(userId) {
 
   async function persist(updated) {
     setSettings(updated);
-    await supabase.from('settings').upsert({ user_id: userId, data: updated, updated_at: new Date().toISOString() });
+    await supabase.from('settings').upsert({ user_id: userId, data: updated, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
   }
 
   function updateWeekDay(day, value) {

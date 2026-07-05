@@ -36,7 +36,7 @@ export function useRecords(year, month, userId) {
     const entryYear = y;
     const entryMonth = m - 1;
 
-    const { data: existing } = await supabase.from('records').select('id').eq('user_id', userId).eq('date', entry.date).single();
+    const { data: existing } = await supabase.from('records').select('id').eq('user_id', userId).eq('date', entry.date).maybeSingle();
 
     if (existing) {
       await supabase
