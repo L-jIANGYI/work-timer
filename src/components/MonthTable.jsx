@@ -6,7 +6,7 @@ export default function MonthTable({ records, onDelete }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6">
+    <div className="bg-white rounded-2xl border border-gray-200 overflow-x-auto mb-6">
       <table className="w-full">
         <thead>
           <tr className="bg-gray-50 text-xs text-gray-400 font-normal">

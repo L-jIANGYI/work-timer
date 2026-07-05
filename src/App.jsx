@@ -90,29 +90,36 @@ export default function App() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-medium text-gray-800">Urenregistratie</h1>
-            {!isLatest && (
-              <button
-                onClick={goToLatest}
-                className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 rounded-lg px-2 py-1 transition-colors"
-              >
-                Naar laatste ↑
+        <div className="mb-6">
+          {/* First Row：Title, Setting, Log out */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-xl font-medium text-gray-800">Urenregistratie</h1>
+              {!isLatest && (
+                <button
+                  onClick={goToLatest}
+                  className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 rounded-lg px-2 py-1 transition-colors"
+                >
+                  Naar laatste ↑
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Settings settings={settings} onUpdateWeekDay={updateWeekDay} onAddTemplate={addTemplate} onRemoveTemplate={removeTemplate} />
+              <button onClick={signOut} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+                Uitloggen
               </button>
-            )}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Second row：Month nav center */}
+          <div className="flex items-center justify-center gap-3">
             <button onClick={prevMonth} className="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
               ‹
             </button>
             <MonthPicker year={year} month={month} onChange={handleSelect} />
             <button onClick={nextMonth} className="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors">
               ›
-            </button>
-            <Settings settings={settings} onUpdateWeekDay={updateWeekDay} onAddTemplate={addTemplate} onRemoveTemplate={removeTemplate} />
-            <button onClick={signOut} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              Uitloggen
             </button>
           </div>
         </div>
