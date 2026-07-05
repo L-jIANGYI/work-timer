@@ -1,36 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from './hooks/useAuth';
 import { useRecords } from './hooks/useRecords';
 import { useSettings } from './hooks/useSettings';
 import { MONTHS_NL } from './utils/timeCalc';
 import { exportToExcel } from './utils/exportExcel';
+import { supabase } from './lib/supabase';
 import ClockPanel from './components/ClockPanel';
 import SummaryBar from './components/SummaryBar';
 import MonthTable from './components/MonthTable';
 import HistoryMonths from './components/HistoryMonths';
 import Settings from './components/Settings';
 import MonthPicker from './components/MonthPicker';
+import Auth from './components/Auth';
 
 function getToday() {
   const t = new Date();
   return { year: t.getFullYear(), month: t.getMonth() };
 }
 
-function getLatestMonthWithRecords() {
-  const keys = Object.keys(localStorage)
-    .filter((k) => /^wt_\d{4}_\d{2}$/.test(k))
-    .sort()
-    .reverse();
-  if (keys.length === 0) return null;
-  const [, year, month] = keys[0].split('_');
-  return { year: Number(year), month: Number(month) - 1 };
+async function getLatestMonthWithRecords(userId) {
+  const { data } = await supabase.from('records').select('date').eq('user_id', userId).order('date', { ascending: false }).limit(1);
+  if (!data || data.length === 0) return null;
+  const [y, m] = data[0].date.split('-').map(Number);
+  return { year: y, month: m - 1 };
 }
 
 export default function App() {
   const today = getToday();
+  const { user, loading, signIn, signUp, signOut } = useAuth();
   const [year, setYear] = useState(today.year);
   const [month, setMonth] = useState(today.month);
-  const { records, addOrUpdate, remove } = useRecords(year, month);
-  const { settings, updateWeekDay, addTemplate, removeTemplate, getTimesForDate } = useSettings();
+  const [latest, setLatest] = useState(null);
+  const { records, addOrUpdate, remove } = useRecords(year, month, user?.id);
+  const { settings, updateWeekDay, addTemplate, removeTemplate, getTimesForDate } = useSettings(user?.id);
+
+  useEffect(() => {
+    if (!user) return;
+    getLatestMonthWithRecords(user.id).then(setLatest);
+  }, [user, records]);
 
   function prevMonth() {
     if (month === 0) {
@@ -51,26 +58,33 @@ export default function App() {
     setMonth(m);
   }
 
-  function handleSave(entry) {
-    addOrUpdate(entry);
+  async function handleSave(entry) {
+    await addOrUpdate(entry);
     const [y, m] = entry.date.split('-').map(Number);
     setYear(y);
     setMonth(m - 1);
   }
 
   function goToLatest() {
-    const latest = getLatestMonthWithRecords();
     if (latest) {
       setYear(latest.year);
       setMonth(latest.month);
     }
   }
 
-  const isLatest = (() => {
-    const latest = getLatestMonthWithRecords();
-    if (!latest) return true;
-    return latest.year === year && latest.month === month;
-  })();
+  const isLatest = !latest || (latest.year === year && latest.month === month);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <span className="text-gray-400 text-sm">Laden...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth onSignIn={signIn} onSignUp={signUp} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -97,6 +111,9 @@ export default function App() {
               ›
             </button>
             <Settings settings={settings} onUpdateWeekDay={updateWeekDay} onAddTemplate={addTemplate} onRemoveTemplate={removeTemplate} />
+            <button onClick={signOut} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              Uitloggen
+            </button>
           </div>
         </div>
 
@@ -105,7 +122,7 @@ export default function App() {
           {/* Left column */}
           <div className="lg:w-80 shrink-0">
             <ClockPanel onSave={handleSave} getTimesForDate={getTimesForDate} templates={settings.templates} />
-            <HistoryMonths currentYear={year} currentMonth={month} onSelect={handleSelect} />
+            <HistoryMonths userId={user.id} currentYear={year} currentMonth={month} onSelect={handleSelect} />
           </div>
 
           {/* Right column */}

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 const DEFAULT_SETTINGS = {
   weekSchema: {
@@ -10,51 +11,42 @@ const DEFAULT_SETTINGS = {
     5: { start: '09:00', end: '17:30' },
     6: null,
   },
-  templates: [{ label: 'Overwerk', start: '09:00', end: '20:00' }],
+  templates: [],
 };
 
-function loadSettings() {
-  try {
-    const raw = localStorage.getItem('wt_settings');
-    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
-  } catch {
-    return DEFAULT_SETTINGS;
+export function useSettings(userId) {
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    if (!userId) return;
+    supabase
+      .from('settings')
+      .select('data')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.data) {
+          setSettings({ ...DEFAULT_SETTINGS, ...data.data });
+        }
+      });
+  }, [userId]);
+
+  async function persist(updated) {
+    setSettings(updated);
+    await supabase.from('settings').upsert({ user_id: userId, data: updated, updated_at: new Date().toISOString() });
   }
-}
-
-function saveSettings(settings) {
-  localStorage.setItem('wt_settings', JSON.stringify(settings));
-}
-
-export function useSettings() {
-  const [settings, setSettings] = useState(loadSettings);
 
   function updateWeekDay(day, value) {
-    const updated = {
-      ...settings,
-      weekSchema: { ...settings.weekSchema, [day]: value },
-    };
-    setSettings(updated);
-    saveSettings(updated);
+    persist({ ...settings, weekSchema: { ...settings.weekSchema, [day]: value } });
   }
 
   function addTemplate(template) {
     if (settings.templates.length >= 4) return;
-    const updated = {
-      ...settings,
-      templates: [...settings.templates, template],
-    };
-    setSettings(updated);
-    saveSettings(updated);
+    persist({ ...settings, templates: [...settings.templates, template] });
   }
 
   function removeTemplate(idx) {
-    const updated = {
-      ...settings,
-      templates: settings.templates.filter((_, i) => i !== idx),
-    };
-    setSettings(updated);
-    saveSettings(updated);
+    persist({ ...settings, templates: settings.templates.filter((_, i) => i !== idx) });
   }
 
   function getTimesForDate(dateStr) {
