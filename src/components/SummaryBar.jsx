@@ -12,7 +12,7 @@ export default function SummaryBar({ records }) {
       </div>
       <div className="bg-blue-50 rounded-xl p-4">
         <div className="text-xs text-blue-400 mb-1">Totaal uren</div>
-        <div className="text-2xl font-medium text-blue-600">{total.toFixed(1)}u</div>
+        <div className="text-2xl font-medium text-blue-600">{total.toFixed(2)}u</div>
       </div>
       <div className="bg-gray-50 rounded-xl p-4">
         <div className="text-xs text-gray-400 mb-1">Gemiddeld per dag</div>
