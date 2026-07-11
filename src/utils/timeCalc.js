@@ -8,7 +8,7 @@ export function calcHours(start, end) {
   const [eh, em] = end.split(':').map(Number);
   let diff = eh * 60 + em - (sh * 60 + sm);
   if (diff < 0) diff += 24 * 60;
-  return diff > 0 ? parseFloat((diff / 60).toFixed(1)) : null;
+  return diff > 0 ? parseFloat((diff / 60).toFixed(2)) : null;
 }
 
 export function getDayOfWeek(dateStr) {
